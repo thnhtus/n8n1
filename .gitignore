@@ -103,3 +103,10 @@ packages/@n8n/db/src/migrations/sqlite/index.ts
 packages/@n8n/db/src/migrations/postgresdb/index.ts
 # Files that local dev tools generate, such as `pnpm telemetry:sink`
 .output/
+
+# Embedded video-factory service (local runtime artifacts)
+/services/video-factory/.env
+/services/video-factory/data/
+/services/video-factory/out/
+/services/video-factory/render/node_modules/
+/services/video-factory/**/.DS_Store

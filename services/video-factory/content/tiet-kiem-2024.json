@@ -1,0 +1,154 @@
+{
+  "title": "Gửi tiết kiệm năm 2024 có thực sự sinh lời",
+  "flow": "E",
+  "outroHold": 3,
+  "profile": "tiktok",
+  "runtime": "remotion",
+  "caption": "Lãi 4,7% nhưng giá cả tăng 3,63%. Tiền gửi năm 2024 thực ra sinh lời bao nhiêu? #taichinhcanhan #tietkiem #lamphat",
+  "facts": [
+    {
+      "id": "f1",
+      "claim": "Lãi suất tiết kiệm 12 tháng cao nhất nhóm Big4 cuối năm 2024 khoảng 4,7%/năm",
+      "source": "https://vietnambiz.vn/cap-nhat-lai-suat-tien-gui-ngan-hang-bidv-moi-nhat-thang-122024-202412215555155.htm"
+    },
+    {
+      "id": "f2",
+      "claim": "CPI bình quân năm 2024 tăng 3,63% so với năm 2023",
+      "source": "https://www.nso.gov.vn/du-lieu-va-so-lieu-thong-ke/2025/01/mot-so-net-chinh-tinh-hinh-kinh-te-xa-hoi-quy-iv-va-nam-2024/"
+    }
+  ],
+  "scenes": [
+    {
+      "id": "hook",
+      "visual": {
+        "shotSize": "medium",
+        "motion": "kinetic",
+        "type": "stat",
+        "value": 4.7,
+        "suffix": " triệu",
+        "label": "Lãi 1 năm trên 100 triệu",
+        "anchor": "bốn"
+      },
+      "lines": [
+        {
+          "text": "Gửi một trăm triệu vào ngân hàng lớn năm 2024, cuối năm bạn nhận về khoảng bốn triệu bảy tiền lãi.",
+          "fact": "f1"
+        },
+        {
+          "text": "Nghe có vẻ an toàn và đều đặn, nhưng con số đó chưa kể hết câu chuyện.",
+          "fact": "f1"
+        }
+      ]
+    },
+    {
+      "id": "picture",
+      "visual": {
+        "shotSize": "wide",
+        "motion": "pan",
+        "type": "ring",
+        "percent": 4.7,
+        "label": "Lãi suất Big4 cuối 2024",
+        "anchor": "lãi"
+      },
+      "lines": [
+        {
+          "text": "Sổ tiết kiệm cho bạn thấy số dư tăng lên mỗi năm một cách rất dễ chịu.",
+          "fact": "f1"
+        },
+        {
+          "text": "Lãi suất cao nhất của nhóm Big4 cuối năm 2024 chỉ quanh bốn phẩy bảy phần trăm một năm.",
+          "fact": "f1"
+        }
+      ]
+    },
+    {
+      "id": "number",
+      "visual": {
+        "shotSize": "close",
+        "motion": "zoom",
+        "type": "stat",
+        "value": 3.63,
+        "suffix": "%",
+        "label": "CPI bình quân 2024",
+        "anchor": "chỉ"
+      },
+      "lines": [
+        {
+          "text": "Tổng cục Thống kê công bố chỉ số giá tiêu dùng bình quân năm 2024 tăng ba phẩy sáu ba phần trăm.",
+          "fact": "f2"
+        },
+        {
+          "text": "Nghĩa là cùng một giỏ hàng hóa, bạn phải trả nhiều tiền hơn so với năm trước.",
+          "fact": "f2"
+        }
+      ]
+    },
+    {
+      "id": "gap",
+      "visual": {
+        "shotSize": "medium",
+        "motion": "kinetic",
+        "type": "compare",
+        "a": {
+          "label": "Lãi suất",
+          "value": 4.7
+        },
+        "b": {
+          "label": "Lạm phát",
+          "value": 3.63
+        },
+        "anchor": "lấy"
+      },
+      "lines": [
+        {
+          "text": "Lấy lãi suất trừ đi lạm phát, phần bạn thực sự giàu lên chỉ còn khoảng một phần trăm.",
+          "fact": "f2"
+        },
+        {
+          "text": "Với một trăm triệu, sức mua tăng thêm chỉ chừng một triệu đồng sau cả năm chờ đợi.",
+          "fact": "f2"
+        }
+      ]
+    },
+    {
+      "id": "payoff",
+      "visual": {
+        "shotSize": "close",
+        "motion": "static",
+        "type": "steps",
+        "items": [
+          "Quỹ dự phòng",
+          "Giữ giá trị",
+          "Đầu tư dài hạn"
+        ],
+        "activeIndex": 2
+      },
+      "lines": [
+        {
+          "text": "Gửi tiết kiệm giúp giữ tiền khỏi mất giá, chứ không phải cách để tài sản lớn nhanh.",
+          "fact": "f2"
+        },
+        {
+          "text": "Hãy coi đó là quỹ dự phòng, còn mục tiêu dài hạn cần thêm những kênh đầu tư khác.",
+          "fact": "f2"
+        }
+      ]
+    },
+    {
+      "id": "share",
+      "visual": {
+        "shotSize": "wide",
+        "motion": "pan",
+        "type": "card",
+        "title": "Tính lại sổ tiết kiệm",
+        "tag": "Gửi người thân"
+      },
+      "lines": [
+        {
+          "text": "Gửi video này cho người thân đang để hết tiền trong sổ tiết kiệm để cùng tính lại.",
+          "fact": "f2"
+        }
+      ]
+    }
+  ]
+}

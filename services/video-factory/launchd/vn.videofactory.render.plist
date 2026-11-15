@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>vn.videofactory.render</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/thanhtu1/.local/share/fnm/node-versions/v24.18.0/installation/bin/node</string>
+		<string>/Users/thanhtu1/persona/n8n1/services/video-factory/render/server.js</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/thanhtu1/persona/n8n1/services/video-factory/render</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/tmp/vf-render.stdout.log</string>
+	<key>StandardErrorPath</key>
+	<string>/tmp/vf-render.stderr.log</string>
+</dict>
+</plist>

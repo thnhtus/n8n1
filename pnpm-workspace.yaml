@@ -577,3 +577,6 @@ allowBuilds:
   utf-8-validate: false
   v-code-diff: false
   vue-demi: false
+permissions:
+  agent-browser:
+    skills: false

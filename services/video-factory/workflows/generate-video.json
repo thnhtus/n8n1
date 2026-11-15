@@ -1,0 +1,423 @@
+{
+  "id": "vfGenerateVideo01",
+  "name": "VF – Generate video",
+  "active": false,
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
+  "nodes": [
+    {
+      "id": "a1",
+      "name": "Manual",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "parameters": {}
+    },
+    {
+      "id": "a2",
+      "name": "Daily 09:00",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        200
+      ],
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 9
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "a3",
+      "name": "Topic",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        220,
+        100
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "t1",
+              "name": "topic",
+              "type": "string",
+              "value": "Quỹ dự phòng khẩn cấp nên bằng mấy tháng chi tiêu"
+            },
+            {
+              "id": "t2",
+              "name": "model",
+              "type": "string",
+              "value": "gemini/gemini-3.1-flash-lite-preview"
+            },
+            {
+              "id": "t3",
+              "name": "flow",
+              "type": "string",
+              "value": "H"
+            },
+            {
+              "id": "t4",
+              "name": "beats",
+              "type": "string",
+              "value": "hook,problem,layer1,layer2,hardest,payoff,share"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "a4",
+      "name": "Write script",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        440,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://localhost:20128/v1/chat/completions",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ model: $json.model, temperature: 0.7, max_tokens: 3000, stream: false, messages: [ { role: 'system', content: \"Bạn viết kịch bản video ngắn tiếng Việt 40-90 giây theo luật kênh. Luật: 1) Facts trước chữ: mỗi câu mang thông tin phải trỏ tới 1 fact có URL nguồn thật, không bịa số liệu. 2) Kết bằng cú lật (payoff phủ định niềm tin người xem) + 1 câu share gắn nội dung, không \\'like và sub\\'. 3) Câu dưới 25 từ, không dùng dấu — – : trong lời đọc, không mở bằng \\'Bạn có biết\\'.  4) Mỗi scene BẮT BUỘC có actor điều khiển nhân vật stickman hoạt hình theo nội dung câu: {\\\"action\\\":\\\"idle|walk|run|jump|wave|think|cheer|sit|fall|point|shrug|dance\\\",\\\"mood\\\":\\\"happy|neutral|sad\\\",\\\"cast\\\":1-4}. Không lặp cùng action quá 2 cảnh liên tiếp. Gợi ý: hook wave hoặc point, vấn đề think shrug fall, payoff cheer jump, share dance, nói về nhiều người thì cast 2-4. Chỉ trả về JSON hợp lệ: {\\\"title\\\": string, \\\"flow\\\": string, \\\"outroHold\\\": 3, \\\"facts\\\": [{\\\"id\\\":\\\"f1\\\",\\\"claim\\\":string,\\\"source\\\":\\\"https://...\\\"}], \\\"scenes\\\": [{\\\"id\\\": beat, \\\"actor\\\": {\\\"action\\\": string, \\\"mood\\\": string, \\\"cast\\\": number}, \\\"lines\\\": [{\\\"text\\\": string, \\\"fact\\\": \\\"f1\\\" hoặc bỏ trống}]}], \\\"caption\\\": string}. scenes đúng thứ tự beats được cho. Không markdown.\" }, { role: 'user', content: 'Chủ đề: ' + $json.topic + '\\nFlow: ' + $json.flow + '\\nBeats: ' + $json.beats } ] }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      }
+    },
+    {
+      "id": "a5",
+      "name": "Parse script",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        660,
+        100
+      ],
+      "parameters": {
+        "jsCode": "// 9Router may append 'data: [DONE]' to non-stream bodies, so the response can arrive as a raw string.\nlet body = $json;\nif (typeof $json.data === 'string') body = JSON.parse($json.data.replace(/\\s*data:\\s*\\[DONE\\]\\s*$/, ''));\nconst choice = body.choices?.[0] ?? {};\nconst text = (choice.message?.content ?? '').replace(/^[\\s`]+|[\\s`]+$/g, '');\nconst start = text.indexOf('{');\nif (start < 0) throw new Error(`LLM did not return JSON (finish_reason=${choice.finish_reason}): ` + text.slice(0, 200));\n// Small models often drop the closing brace, so try the text as-is, then with '}' appended.\nconst raw = text.slice(start, text.lastIndexOf('}') + 1 || undefined);\nlet s;\nfor (const c of [raw, text.slice(start) + '}']) { try { s = JSON.parse(c); break; } catch {} }\nif (!s) throw new Error('LLM JSON unparsable: ' + text.slice(0, 200));\nif (!s.title || !Array.isArray(s.scenes) || !s.scenes.length) throw new Error('Script missing title or scenes');\n// Speech must not carry banned punctuation (docs/soul/thresholds.json bannedPunctuationInSpeech): dashes/colons become commas, ellipses and v.v. are dropped.\nconst clean = (t) => String(t).replace(/\\s*(?:v\\.v\\.|\\.\\.\\.|…)/g, \"\").replace(/\\s*[—–:]\\s*/g, \", \").replace(/,\\s*,/g, \",\").replace(/^,\\s*/, \"\").trim();\nfor (const sc of s.scenes) for (const l of sc.lines ?? []) l.text = clean(l.text);\n// Stickman actor per scene (render/src/stickman.jsx). Unknown values fall back to a beat default, so a bad LLM field never breaks the render.\nconst ACTIONS = ['idle','walk','run','jump','wave','think','cheer','sit','fall','point','shrug','dance'];\nconst BEAT_ACTION = { hook: 'wave', problem: 'think', hardest: 'shrug', payoff: 'cheer', share: 'dance' };\nfor (const sc of s.scenes) {\n  const a = sc.actor && typeof sc.actor === 'object' ? sc.actor : {};\n  if (a.lottie) continue;\n  sc.actor = {\n    action: ACTIONS.includes(a.action) ? a.action : BEAT_ACTION[sc.id] ?? 'point',\n    mood: ['happy','neutral','sad'].includes(a.mood) ? a.mood : 'neutral',\n    cast: Math.min(4, Math.max(1, Math.round(Number(a.cast) || 1))),\n  };\n}\ns.flow = s.flow || $('Topic').item.json.flow;\ns.outroHold = Number(s.outroHold) || 3;\nreturn [{ json: s }];"
+      }
+    },
+    {
+      "id": "a6",
+      "name": "Render",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        880,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3030/render",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "timeout": 600000
+        }
+      }
+    },
+    {
+      "id": "a8",
+      "name": "Download video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        990,
+        100
+      ],
+      "parameters": {
+        "method": "GET",
+        "url": "={{ $('Render').item.json.url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data"
+            }
+          },
+          "timeout": 600000
+        }
+      }
+    },
+    {
+      "id": "qc1",
+      "name": "QC video",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1100,
+        100
+      ],
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3030/qc",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ file: $('Render').item.json.id + '/' + $('Render').item.json.id + '-upload.mp4' }) }}",
+        "options": {
+          "timeout": 120000
+        }
+      }
+    },
+    {
+      "id": "a7",
+      "name": "Result",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1320,
+        100
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "r1",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $('Parse script').item.json.title }}"
+            },
+            {
+              "id": "r2",
+              "name": "key",
+              "type": "string",
+              "value": "={{ $('Render').item.json.key }}"
+            },
+            {
+              "id": "r3",
+              "name": "url",
+              "type": "string",
+              "value": "={{ $('Render').item.json.url }}"
+            },
+            {
+              "id": "r4",
+              "name": "durationSec",
+              "type": "number",
+              "value": "={{ $('Render').item.json.durationSec }}"
+            },
+            {
+              "id": "r5",
+              "name": "publishable",
+              "type": "boolean",
+              "value": "={{ $('Render').item.json.publishable && $('QC video').item.json.pass === true }}"
+            },
+            {
+              "id": "r6",
+              "name": "out",
+              "type": "string",
+              "value": "={{ $('Render').item.json.out }}"
+            },
+            {
+              "id": "r7",
+              "name": "lintErrors",
+              "type": "string",
+              "value": "={{ $('Render').item.json.lint.errors.join('\\n') }}"
+            },
+            {
+              "id": "r8",
+              "name": "qcPass",
+              "type": "boolean",
+              "value": "={{ $('QC video').item.json.pass }}"
+            },
+            {
+              "id": "r9",
+              "name": "qcScore",
+              "type": "number",
+              "value": "={{ $('QC video').item.json.score }}"
+            },
+            {
+              "id": "r10",
+              "name": "qcErrors",
+              "type": "string",
+              "value": "={{ ($('QC video').item.json.errors ?? []).join('\\n') }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "pt1",
+      "name": "Publish TikTok",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        200
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "http://127.0.0.1:3030/publish/tiktok",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ key: $json.key, title: $json.title }) }}",
+        "options": {
+          "timeout": 600000
+        }
+      }
+    },
+    {
+      "id": "g1",
+      "name": "Publishable?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1540,
+        300
+      ],
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "c1",
+              "leftValue": "={{ $json.publishable }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ]
+        },
+        "options": {}
+      }
+    }
+  ],
+  "connections": {
+    "Manual": {
+      "main": [
+        [
+          {
+            "node": "Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily 09:00": {
+      "main": [
+        [
+          {
+            "node": "Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic": {
+      "main": [
+        [
+          {
+            "node": "Write script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write script": {
+      "main": [
+        [
+          {
+            "node": "Parse script",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse script": {
+      "main": [
+        [
+          {
+            "node": "Render",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render": {
+      "main": [
+        [
+          {
+            "node": "Download video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Result": {
+      "main": [
+        [
+          {
+            "node": "Publishable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download video": {
+      "main": [
+        [
+          {
+            "node": "QC video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Publishable?": {
+      "main": [
+        [
+          {
+            "node": "Publish TikTok",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "QC video": {
+      "main": [
+        [
+          {
+            "node": "Result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {}
+}

@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>vn.n8n.dev</string>
+	<key>ProgramArguments</key>
+	<array>
+		<string>/Users/thanhtu1/.local/share/fnm/node-versions/v24.18.0/installation/bin/node</string>
+		<string>/Users/thanhtu1/persona/n8n1/packages/cli/bin/n8n</string>
+		<string>start</string>
+	</array>
+	<key>WorkingDirectory</key>
+	<string>/Users/thanhtu1/persona/n8n1</string>
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/Users/thanhtu1/.local/share/fnm/current/bin:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+		<key>NODES_EXCLUDE</key>
+		<string>[]</string>
+
+	</dict>
+	<key>RunAtLoad</key>
+	<true/>
+	<key>KeepAlive</key>
+	<true/>
+	<key>StandardOutPath</key>
+	<string>/tmp/n8n-dev.stdout.log</string>
+	<key>StandardErrorPath</key>
+	<string>/tmp/n8n-dev.stderr.log</string>
+</dict>
+</plist>

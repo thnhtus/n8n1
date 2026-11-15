@@ -1,0 +1,11 @@
+services:
+  rustfs:
+    image: rustfs/rustfs:1.0.4 # pinned: no surprise upgrades
+    restart: unless-stopped
+    ports: ["9000:9000", "9001:9001"]
+    environment:
+      RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
+      RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
+      RUSTFS_CONSOLE_ENABLE: "true"
+    volumes: ["${FACTORY_DATA_DIR}/s3:/data"]
+    command: /data

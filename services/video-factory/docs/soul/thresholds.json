@@ -1,0 +1,117 @@
+{
+  "_comment": "Các ngưỡng kỹ thuật đo lường được cho video-factory (kế thừa từ shorts-kit/docs/soul/thresholds.json)",
+  "maxDurationSeconds": 180,
+  "targetDurationSeconds": [
+    40,
+    90
+  ],
+  "outroHoldSeconds": [
+    3,
+    4
+  ],
+  "maxWordsPerSentence": 25,
+  "medianWordsPerSentence": 16,
+  "shortSentenceWords": 7,
+  "shortSentenceMaxShare": 0.13,
+  "veryShortSentenceWords": 4,
+  "veryShortSentenceMaxShare": 0.04,
+  "factEverySeconds": 3.5,
+  "captionWordsPerChunk": [
+    2,
+    5
+  ],
+  "safeZone": {
+    "width": 1080,
+    "height": 1920,
+    "topPx": 212,
+    "bottomPx": 1726,
+    "rightAvoidX": 927,
+    "rightAvoidFromY": 803,
+    "panelMaxWidthPx": 774
+  },
+  "audio": {
+    "loudnessLUFS": -13,
+    "loudnessToleranceLU": 1,
+    "truePeakMaxDb": -1,
+    "sampleRate": 48000,
+    "aacBitrate": "192k"
+  },
+  "video": {
+    "fps": 30,
+    "codec": "libx264",
+    "pixFmt": "yuv420p",
+    "colorSpace": "bt709",
+    "colorRange": "tv",
+    "crf": 18
+  },
+  "cover": {
+    "thumbTestWidthPx": 200,
+    "maxTitleWords": 4
+  },
+  "bannedPhrasesVi": [
+    "bạn có biết",
+    "bạn sẽ không tin",
+    "sự thật bất ngờ",
+    "chào mừng các bạn",
+    "trong video hôm nay",
+    "đừng quên like",
+    "đăng ký kênh",
+    "bấm follow",
+    "nhấn follow",
+    "link ở bio",
+    "link ở dưới",
+    "tóm lại là",
+    "không thể tin nổi"
+  ],
+  "bannedPunctuationInSpeech": [
+    "—",
+    "–",
+    ":",
+    "v.v.",
+    "..."
+  ],
+  "profiles": {
+    "shorts": {
+      "maxSeconds": 60,
+      "crf": 20,
+      "maxMB": 256
+    },
+    "reels": {
+      "maxSeconds": 90,
+      "crf": 18,
+      "maxMB": 250
+    },
+    "tiktok": {
+      "maxSeconds": 180,
+      "crf": 18,
+      "maxMB": 287
+    }
+  },
+  "defaultProfile": "tiktok",
+  "music": {
+    "bedVolume": 0.14,
+    "duck": "threshold=0.02:ratio=9:attack=200:release=500:level_sc=1:mix=0.9",
+    "fadeOutSec": 1.5
+  },
+  "sfx": {
+    "volume": 0.6,
+    "leadFrames": 1,
+    "cut": [
+      "whoosh"
+    ],
+    "number": [
+      "pop",
+      "tick"
+    ],
+    "payoff": [
+      "riser"
+    ]
+  },
+  "hookVisibleBySec": 0.5,
+  "variation": {
+    "maxShotShare": 0.5,
+    "maxSameShotRun": 2,
+    "maxStaticShare": 0.6,
+    "slideshowRiskFail": 4
+  }
+}

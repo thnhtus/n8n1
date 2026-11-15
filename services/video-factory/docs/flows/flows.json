@@ -1,0 +1,328 @@
+{
+ "A": {
+  "name": "Three reasons",
+  "file": "A-three-reasons.md",
+  "beats": [
+   "hook",
+   "reason1",
+   "reason2",
+   "reason3",
+   "context",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": true,
+  "hasTurn": true,
+  "shape": "hook → reason 1 / 2 / 3 → context → payoff → share"
+ },
+ "B": {
+  "name": "Trace back",
+  "file": "B-trace-back.md",
+  "beats": [
+   "hook",
+   "origin",
+   "link1",
+   "link2",
+   "link3",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "a claim everyone repeats → \"who said it first?\" → walk back link by link → reach a measurement, or reach nothing"
+ },
+ "C": {
+  "name": "One journey",
+  "file": "C-one-journey.md",
+  "beats": [
+   "hook",
+   "leg1",
+   "leg2",
+   "leg3",
+   "destination",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "one continuous move from A to B; facts arrive as the camera passes them → land at the destination"
+ },
+ "D": {
+  "name": "Side by side",
+  "file": "D-side-by-side.md",
+  "beats": [
+   "hook",
+   "thing1",
+   "thing2",
+   "ruler",
+   "closing",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "two things, at true scale → the whole video closes the gap between what the viewer assumes and what the ruler says"
+ },
+ "E": {
+  "name": "The picture lies",
+  "file": "E-the-picture-lies.md",
+  "beats": [
+   "hook",
+   "picture",
+   "number",
+   "gap",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "the subject is the DEPICTION (or the wording), not the thing depicted → what is drawn or written contradicts what is measured"
+ },
+ "F": {
+  "name": "Crossing the border",
+  "file": "F-crossing-the-border.md",
+  "beats": [
+   "hook",
+   "arrival",
+   "expensive",
+   "modified",
+   "identity",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "something arrives → expensive and foreign → gets modified → becomes local identity"
+ },
+ "G": {
+  "name": "A recurring deadline",
+  "file": "G-recurring-deadline.md",
+  "beats": [
+   "hook",
+   "calendar",
+   "due1",
+   "missed1",
+   "missed2",
+   "breaks",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "a duty falls due again and again → the run of times it was missed → what breaks is not money but a relationship"
+ },
+ "H": {
+  "name": "Explain it",
+  "file": "H-explain-it.md",
+  "beats": [
+   "hook",
+   "problem",
+   "layer1",
+   "layer2",
+   "hardest",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": false,
+  "shape": "set the problem → build it up layer by layer → the hardest part is EXPLAINED, not hidden → close on the thing worth remembering"
+ },
+ "I": {
+  "name": "The record changed, the world did not",
+  "file": "I-record-changed.md",
+  "beats": [
+   "hook",
+   "record",
+   "change",
+   "mechanism",
+   "unchanged",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "a record everyone knows → it changed value on a DATE → nothing in the world moved, only the definition → close on: what are we measuring?"
+ },
+ "J": {
+  "name": "What was lost",
+  "file": "J-what-was-lost.md",
+  "beats": [
+   "hook",
+   "whatitwas",
+   "lost",
+   "left1",
+   "left2",
+   "left3",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "the place → what it was → how it was lost → what it left behind, each piece standing alone → close on a new idea"
+ },
+ "K": {
+  "name": "Argument",
+  "file": "K-argument.md",
+  "beats": [
+   "hook",
+   "hole1",
+   "hole2",
+   "hole3",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": true,
+  "hasTurn": false,
+  "shape": "show ONE sentence everyone has heard → \"how many holes does it have?\" → hole one, two, three, each with a name and an everyday comparison → summary card → one verdict"
+ },
+ "L": {
+  "name": "News explainer",
+  "file": "L-news-explainer.md",
+  "beats": [
+   "hook",
+   "event",
+   "trigger",
+   "root1",
+   "root2",
+   "root3",
+   "response",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": false,
+  "shape": "an event with a date and a number → \"why?\" → the trigger everyone sees → root causes layer by layer, each with measured evidence → what is being done, with a date → close on what the viewer takes away for next time"
+ },
+ "M": {
+  "name": "Change one word",
+  "file": "M-change-one-word.md",
+  "beats": [
+   "hook",
+   "inner1",
+   "label",
+   "inner2",
+   "measure",
+   "limits",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "a sentence the viewer says in their own head → let them hear it once → the fault is not the feeling but the LABEL → change exactly ONE word → measure → state the limits → close"
+ },
+ "N": {
+  "name": "Talking to one person",
+  "file": "N-talking-to-one-person.md",
+  "beats": [
+   "hook",
+   "origin",
+   "alarm",
+   "cost",
+   "reframe",
+   "limits",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "something in the viewer is misunderstood → why it EXISTS (a function, not a fault) → why it overshoots (design, not breakage) → what it costs → change its MEANING, distinct from changing its label → the clinical line → close"
+ },
+ "O": {
+  "name": "Reading a graph",
+  "file": "O-reading-a-graph.md",
+  "beats": [
+   "hook",
+   "character",
+   "curve",
+   "sketch",
+   "points",
+   "secondline",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": false,
+  "shape": "a character or scene gives the feeling → name the phenomenon → explain it through the scene → place the character on ONE chart → add a second line or point on the same chart → close back on the character and the name"
+ },
+ "P": {
+  "name": "Empty world, late reveal",
+  "file": "P-empty-world-late-reveal.md",
+  "beats": [
+   "hook",
+   "setup",
+   "ordeal",
+   "loss",
+   "alone",
+   "landfall",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "a person alone inside one scene with no map → time counted by objects in a corner → events happen in the same world → only at the end the camera pulls out to reveal where they were all along"
+ },
+ "Q": {
+  "name": "Line and two clocks",
+  "file": "Q-line-and-two-clocks.md",
+  "beats": [
+   "hook",
+   "rules",
+   "leg1",
+   "leg2",
+   "leg3",
+   "leg4",
+   "homecoming",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "the arrival, and the gap between plan and reality → the rules set at the start → the line drawn leg by leg → two year-clocks run: planned vs actual, labelled MOVING / WAITING → close on the gap in one sentence"
+ },
+ "R": {
+  "name": "One small moment, then pull out",
+  "file": "R-one-scene-then-pull-out.md",
+  "beats": [
+   "hook",
+   "before",
+   "camp",
+   "setup",
+   "moment",
+   "aftermath",
+   "turn",
+   "consequence",
+   "payoff",
+   "share"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": true,
+  "shape": "one small, human moment (a nap, a missed signal) → how things got there → the moment unfolds in one illustrated place, a time-of-day clock in the corner → the consequence → pull out to the big map and fill what was lost"
+ },
+ "S": {
+  "name": "Name the feeling",
+  "file": "S-name-the-feeling.md",
+  "beats": [
+   "hook",
+   "origin",
+   "meaning",
+   "why",
+   "reveal",
+   "payoff"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": false,
+  "shape": "a scene everyone recognises makes the viewer feel something → name it (and its translation) → where the image came from → what the word means → why it causes the feeling → the real origin revealed → close: next time you feel it, you'll know its name"
+ },
+ "T": {
+  "name": "Old story, new face",
+  "file": "T-old-story-new-face.md",
+  "beats": [
+   "hook",
+   "myth",
+   "figure",
+   "evidence",
+   "payoff"
+  ],
+  "spokenNumbering": false,
+  "hasTurn": false,
+  "shape": "a famous modern scene → a phenomenon named after an old story → tell the old story → map the modern figure onto it → one measured result → return to the scene, then hand a question back"
+ }
+}

@@ -1,0 +1,81 @@
+{
+  "browser": {
+    "mode": "launch",
+    "executable_path": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+    "headless": false
+  },
+  "start_url": {
+    "url": "https://www.tiktok.com/login/phone-or-email/email",
+    "query": []
+  },
+  "secrets": [
+    {
+      "secret_id": "TikTok.Username",
+      "environment_variable": "TIKTOK_USERNAME"
+    },
+    {
+      "secret_id": "TikTok.Password",
+      "environment_variable": "TIKTOK_PASSWORD"
+    }
+  ],
+  "environment": {
+    "locale": "en-US",
+    "timezone": "America/New_York",
+    "color_scheme": "light"
+  },
+  "actions": [
+    {
+      "step_id": "step_fill_username",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[name=\"username\"], input[type=\"text\"]"
+      },
+      "value": {
+        "source": "secret",
+        "secret_id": "TikTok.Username"
+      }
+    },
+    {
+      "step_id": "step_fill_password",
+      "action": "fill",
+      "locator": {
+        "kind": "css",
+        "selector": "input[type=\"password\"]"
+      },
+      "value": {
+        "source": "secret",
+        "secret_id": "TikTok.Password"
+      }
+    },
+    {
+      "step_id": "step_click_login",
+      "action": "click",
+      "locator": {
+        "kind": "css",
+        "selector": "button[type=\"submit\"]"
+      }
+    },
+    {
+      "step_id": "step_wait_result",
+      "action": "wait_for_timeout",
+      "duration_ms": 10000
+    }
+  ],
+  "capture": {
+    "at_end": [
+      "url",
+      "storage",
+      "screenshot"
+    ],
+    "events": [
+      "network",
+      "console"
+    ],
+    "network": {
+      "request_body": true,
+      "response_body": false,
+      "header_values": true
+    }
+  }
+}
