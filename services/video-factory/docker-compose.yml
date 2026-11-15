@@ -1,8 +1,18 @@
+# Video Factory full stack (n8n + render + RustFS): one `docker compose up -d`.
+# All services share the host network: 9Router only accepts loopback callers,
+# and n8n reaches the render and RustFS services on localhost.
+#
+# Start (ports freed: stop host n8n and the render launchd job first):
+#   docker compose up -d --build
+#   open http://localhost:5678
+#
+# First run only: edit a workflow to attach the three credentials that already
+# exist in your n8n DB (9Router, RustFS, TikTok). See README.md.
 services:
   rustfs:
     image: rustfs/rustfs:1.0.4 # pinned: no surprise upgrades
     restart: unless-stopped
-    ports: ["9000:9000", "9001:9001"]
+    network_mode: host
     environment:
       RUSTFS_ACCESS_KEY: ${RUSTFS_ACCESS_KEY}
       RUSTFS_SECRET_KEY: ${RUSTFS_SECRET_KEY}
@@ -11,13 +21,10 @@ services:
     command: /data
 
   render:
-    profiles: ["render"] # host launchd uses :3030 too; opt in via --profile
     build:
       context: .
       dockerfile: render/Dockerfile
     restart: unless-stopped
-    # 9Router rejects non-loopback callers (it checks the Host/x-forwarded-for),
-    # so the container shares the host network and reaches it on localhost.
     network_mode: host
     env_file: [.env]
     environment:
@@ -30,3 +37,17 @@ services:
       - ${FACTORY_DATA_DIR}:/app/data
       - ./out:/app/out
       - ./content:/app/content
+
+  n8n:
+    image: n8nio/n8n:2.47.0 # matches the repo version (packages/cli 2.47.0)
+    restart: unless-stopped
+    network_mode: host
+    environment:
+      N8N_USER_FOLDER: /home/node/.n8n
+      N8N_PORT: 5678
+      N8N_HOST: 127.0.0.1
+      N8N_RUNNERS_ENABLED: "false"
+      GENERIC_TIMEZONE: Asia/Ho_Chi_Minh
+    volumes:
+      # Same data dir as the host n8n: never run both at once (one SQLite file).
+      - ${N8N_HOME:-${HOME}/.n8n}:/home/node/.n8n
