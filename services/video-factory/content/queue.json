@@ -1,0 +1,56 @@
+{
+  "items": [
+    {
+      "topic": "Phân biệt lãi suất danh nghĩa và lãi suất thực",
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "flow": "E",
+      "beats": "hook,myth,proof,contrast,payoff,share",
+      "profile": "tiktok",
+      "status": "pending"
+    },
+    {
+      "topic": "Quy tắc 50/30/20 trong quản lý thu nhập cá nhân",
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "flow": "H",
+      "beats": "hook,problem,layer1,layer2,hardest,payoff,share",
+      "profile": "tiktok",
+      "status": "pending"
+    },
+    {
+      "topic": "3 loại nợ nên trả trước khi nghĩ đến đầu tư",
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "flow": "A",
+      "beats": "hook,reason1,reason2,reason3,context,payoff,share",
+      "profile": "tiktok",
+      "status": "pending"
+    },
+    {
+      "topic": "Lạm phát ăn mòn tiền gửi tiết kiệm như thế nào",
+      "model": "gemini/gemini-3.1-flash-lite-preview",
+      "flow": "C",
+      "beats": "hook,start,step1,step2,step3,payoff,share",
+      "profile": "tiktok",
+      "status": "pending"
+    },
+    {
+      "topic": "Bitcoin biến động mạnh, nhà đầu tư nên làm gì?",
+      "status": "pending"
+    },
+    {
+      "topic": "Giá vàng hôm nay, thời điểm vàng chốt lời đầu tư",
+      "status": "pending"
+    },
+    {
+      "topic": "Quản lý chi tiêu mùa mưa bão, tiết kiệm tiền khẩn cấp",
+      "status": "pending"
+    },
+    {
+      "topic": "Bẫy tâm lý FOMO trong đầu tư tài chính",
+      "status": "pending"
+    },
+    {
+      "topic": "Cách xây dựng quỹ dự phòng tránh nợ xấu",
+      "status": "pending"
+    }
+  ]
+}

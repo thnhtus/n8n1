@@ -11,12 +11,15 @@ import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import express from 'express';
-import { publish as publishTikTok } from './tiktok.js';
 import { T, beatGrid, lintNarration, lintTiming, snapDurationToBeat } from './lint.js';
 import { planSfx, buildAudioMix } from './audio.js';
 import { qcVideo } from './qc.js';
 import { renderHyperFrames } from './hyperframes.js';
 import { genBackground } from './bgimage.js';
+import { openDb, recordVideo, markPublished, ingestMetrics, learn } from './analytics.js';
+import { nextTopic, doneTopic, addTopics, resetStale } from './topics.js';
+import { publishTo } from './publishers.js';
+import { refill } from './strategy.js';
 
 const execFile = promisify(execFileCb);
 const env = process.env;
@@ -29,16 +32,20 @@ const OUT = resolve(HERE, '../out');
 const ROOT = resolve(HERE, '..');
 const MAX_LINES = 40;
 const LINE_PAUSE = 0.25; // breath between lines, seconds
+// Linux ARM64 has no Chrome Headless Shell download: the container points this at apt chromium.
+const BROWSER = env.BROWSER_EXECUTABLE || null;
 
-const s3 = new S3Client({
-	region: env.S3_REGION ?? 'us-east-1',
-	endpoint: env.S3_ENDPOINT ?? `http://localhost:${env.RUSTFS_PORT ?? 9000}`,
-	forcePathStyle: true,
-	credentials: {
-		accessKeyId: env.S3_ACCESS_KEY ?? env.RUSTFS_ACCESS_KEY,
-		secretAccessKey: env.S3_SECRET_KEY ?? env.RUSTFS_SECRET_KEY,
-	},
-});
+const db = openDb();
+const s3Creds = {
+	accessKeyId: env.S3_ACCESS_KEY ?? env.RUSTFS_ACCESS_KEY,
+	secretAccessKey: env.S3_SECRET_KEY ?? env.RUSTFS_SECRET_KEY,
+};
+const s3Endpoint = env.S3_ENDPOINT ?? `http://localhost:${env.RUSTFS_PORT ?? 9000}`;
+const s3 = new S3Client({ region: env.S3_REGION ?? 'us-east-1', endpoint: s3Endpoint, forcePathStyle: true, credentials: s3Creds });
+// In a container the internal endpoint is not reachable from the host, so presign on the public one.
+const s3Public = env.S3_PUBLIC_ENDPOINT
+	? new S3Client({ region: env.S3_REGION ?? 'us-east-1', endpoint: env.S3_PUBLIC_ENDPOINT, forcePathStyle: true, credentials: s3Creds })
+	: s3;
 
 const probe = async (file) => {
 	const { stdout } = await execFile('ffprobe', ['-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', file]);
@@ -139,8 +146,8 @@ async function renderJob(n, voice = DEFAULT_VOICE) {
 			raw = hf.rawOut;
 		} else {
 			const serveUrl = await bundled;
-			const composition = await selectComposition({ serveUrl, id: 'Short', inputProps });
-			await renderMedia({ serveUrl, composition, inputProps, codec: 'h264', outputLocation: raw, hardwareAcceleration: 'if-possible' });
+			const composition = await selectComposition({ serveUrl, id: 'Short', inputProps, browserExecutable: BROWSER });
+			await renderMedia({ serveUrl, composition, inputProps, codec: 'h264', outputLocation: raw, hardwareAcceleration: 'if-possible', browserExecutable: BROWSER });
 		}
 
 		// Finishing pass: voice + ducked bed + SFX → loudnorm to platform target, BT.709 tv-range yuv420p, 48k AAC, faststart.
@@ -196,9 +203,14 @@ async function renderJob(n, voice = DEFAULT_VOICE) {
 
 		const key = `videos/${id}.mp4`;
 		await s3.send(new PutObjectCommand({ Bucket: BUCKET, Key: key, Body: await readFile(upload), ContentType: 'video/mp4' }));
-		const url = await getSignedUrl(s3, new GetObjectCommand({ Bucket: BUCKET, Key: key }), { expiresIn: 7 * 24 * 3600 });
+		const url = await getSignedUrl(s3Public, new GetObjectCommand({ Bucket: BUCKET, Key: key }), { expiresIn: 7 * 24 * 3600 });
 		// Hand-off by default. Auto-post only when the script and the rendered video both pass AND the owner opted in.
 		const publishable = lint.errors.length === 0 && (qc?.pass ?? false) && env.AUTO_PUBLISH === 'true';
+		try {
+			recordVideo(db, { id, title: n.title, flow: n.flow, runtime: n.runtime, profile: n.profile, durationSec: totalSec, qcScore: qc?.score ?? null, key, url });
+		} catch (e) {
+			console.error(`[render ${id}] analytics record failed:`, e.message);
+		}
 		return { id, key, url, out, durationSec: Number(totalSec.toFixed(2)), lint, qc, publishable };
 	} finally {
 		await rm(tmp, { recursive: true, force: true });
@@ -232,18 +244,53 @@ app.post('/qc', async (req, res) => {
 		res.status(500).json({ error: String(e.message) });
 	}
 });
-app.post('/publish/tiktok', async (req, res) => {
-	const { key, title, privacy } = req.body ?? {};
+app.post('/publish', async (req, res) => {
+	const { platforms = (env.VF_PLATFORMS ?? 'tiktok').split(',').map((x) => x.trim()).filter(Boolean), key, title, caption, privacy, profile } = req.body ?? {};
 	if (!key) return res.status(400).json({ error: 'Missing S3 key' });
-	try {
+	const fetchObject = async () => {
 		const s3Res = await s3.send(new GetObjectCommand({ Bucket: BUCKET, Key: key }));
 		const chunks = [];
 		for await (const chunk of s3Res.Body) chunks.push(chunk);
-		const result = await publishTikTok({ video: Buffer.concat(chunks), title: title ?? 'Video Factory Short', privacy });
-		res.json({ ok: true, result });
+		return Buffer.concat(chunks);
+	};
+	try {
+		const results = await publishTo(platforms, { key, title: title ?? 'Video Factory Short', caption, privacy, profile, fetchObject });
+		for (const [p, r] of Object.entries(results)) {
+			if (r.ok) markPublished(db, key.split('/').pop()?.replace('.mp4', ''), p);
+		}
+		res.json({ ok: true, results });
 	} catch (e) {
-		res.status(500).json({ ok: false, error: e.message });
+		res.status(500).json({ ok: false, error: String(e.message ?? e) });
 	}
+});
+// ponytail: a crashed run's topic is retried on the next call; fine with one run at a time, add leases if runs overlap.
+app.get('/topic/next', async (_, res) => {
+	await resetStale();
+	const t = await nextTopic();
+	res.json(t ? { ok: true, topic: t } : { ok: true, topic: null });
+});
+app.post('/topic/done', async (req, res) => {
+	const ok = await doneTopic(req.body?.topic);
+	res.json({ ok });
+});
+app.post('/topic/add', async (req, res) => {
+	const items = Array.isArray(req.body?.items) ? req.body.items : [];
+	const n = await addTopics(items);
+	res.json({ ok: true, added: n });
+});
+app.post('/analytics/ingest', async (req, res) => {
+	const { videoId, platform, ...m } = req.body ?? {};
+	if (!videoId || !platform) return res.status(400).json({ error: 'videoId and platform required' });
+	try {
+		ingestMetrics(db, videoId, platform, m);
+		res.json({ ok: true });
+	} catch (e) {
+		res.status(400).json({ ok: false, error: String(e.message ?? e) });
+	}
+});
+app.get('/analytics/learn', (_, res) => res.json(learn(db)));
+app.get('/trends/refill', async (_, res) => {
+	try { res.json(await refill()); } catch (e) { res.status(500).json({ ok: false, error: String(e.message ?? e) }); }
 });
 
 app.post('/render', (req, res) => {
@@ -271,4 +318,5 @@ app.post('/render', (req, res) => {
 });
 
 await mkdir(JOBS, { recursive: true });
-app.listen(PORT, '127.0.0.1', () => console.log(`render service on :${PORT}`));
+// Container sets HOST=0.0.0.0 so the published port is reachable; default stays loopback for launchd.
+app.listen(PORT, env.HOST ?? '127.0.0.1', () => console.log(`render service on :${PORT}`));

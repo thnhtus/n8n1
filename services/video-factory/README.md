@@ -14,6 +14,10 @@ n8n workflow → 9Router LLM (script) → render service :3030 (TTS + Remotion)
 | --- | --- |
 | `render/` | Express render service + Remotion compositions. Own `package.json`, not part of the pnpm workspace |
 | `workflows/` | n8n workflow JSON to import (`generate-video.json`, `publish-template.json`) |
+| `render/analytics.js` | Analytics + Learning Engine (SQLite `data/analytics.sqlite`) — ghi nhận video, nạp metric, `GET /analytics/learn` |
+| `render/strategy.js` | Trend Intelligence: `GET /trends/refill` (Google Trends VN → LLM → topic mới vào queue) |
+| `render/topics.js` | Content queue (`content/queue.json`): `GET /topic/next`, `POST /topic/done`, `POST /topic/add` |
+| `render/publishers.js` | Multi-platform publish (`POST /publish`, platform: tiktok/youtube/meta) |
 | `docs/` | SOUL, thresholds, 20 flows, shot dictionary, facts ledger |
 | `launchd/` | launchd plists for the render service and the daily backup |
 | `backup.sh` | Backup of n8n SQLite database, encryption key, S3 data |

@@ -9,3 +9,24 @@ services:
       RUSTFS_CONSOLE_ENABLE: "true"
     volumes: ["${FACTORY_DATA_DIR}/s3:/data"]
     command: /data
+
+  render:
+    profiles: ["render"] # host launchd uses :3030 too; opt in via --profile
+    build:
+      context: .
+      dockerfile: render/Dockerfile
+    restart: unless-stopped
+    # 9Router rejects non-loopback callers (it checks the Host/x-forwarded-for),
+    # so the container shares the host network and reaches it on localhost.
+    network_mode: host
+    env_file: [.env]
+    environment:
+      HOST: 127.0.0.1
+      PORT: 3030
+      ROUTER_BASE_URL: http://localhost:20128/v1
+      S3_ENDPOINT: http://localhost:9000
+      FACTORY_DATA_DIR: /app/data
+    volumes:
+      - ${FACTORY_DATA_DIR}:/app/data
+      - ./out:/app/out
+      - ./content:/app/content

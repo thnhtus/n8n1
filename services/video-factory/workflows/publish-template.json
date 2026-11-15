@@ -1,34 +1,82 @@
 {
   "id": "vfPublishTemplate01",
-  "name": "VF – Publish (stub)",
+  "name": "VF – Publish",
   "active": false,
-  "settings": { "executionOrder": "v1", "timezone": "Asia/Ho_Chi_Minh" },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Asia/Ho_Chi_Minh"
+  },
   "nodes": [
     {
-      "id": "p1", "name": "Webhook", "type": "n8n-nodes-base.webhook", "typeVersion": 2, "position": [0, 100],
-      "parameters": { "httpMethod": "POST", "path": "vf-publish", "responseMode": "onReceived" },
+      "id": "p1",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        100
+      ],
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "vf-publish",
+        "responseMode": "onReceived"
+      },
       "webhookId": "vf-publish-stub"
     },
     {
-      "id": "p2", "name": "Validate input", "type": "n8n-nodes-base.code", "typeVersion": 2, "position": [220, 100],
+      "id": "p2",
+      "name": "Validate input",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        220,
+        100
+      ],
       "parameters": {
-        "jsCode": "const { key, title, privacy } = $json.body ?? {};\nif (!key) throw new Error('Missing S3 key');\nreturn [{ json: { key, title: title ?? 'Video Factory Short', privacy: privacy ?? 'SELF_ONLY' } }];"
+        "jsCode": "const { key, title, caption, privacy, platforms } = $json.body ?? {};\nif (!key) throw new Error('Missing S3 key');\nreturn [{ json: { key, title: title ?? 'Video Factory Short', caption, privacy, platforms: Array.isArray(platforms) && platforms.length ? platforms : ['tiktok'] } }];"
       }
     },
     {
-      "id": "p3", "name": "TikTok: Upload via render sidecar", "type": "n8n-nodes-base.httpRequest", "typeVersion": 4.2, "position": [460, 100],
+      "id": "p3",
+      "name": "Publish (multi-platform)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        460,
+        100
+      ],
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:3030/publish/tiktok",
+        "url": "http://127.0.0.1:3030/publish",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ key: $json.key, title: $json.title, privacy: $json.privacy }) }}"
+        "jsonBody": "={{ JSON.stringify($json) }}"
       }
     }
   ],
   "connections": {
-    "Webhook": { "main": [[{ "node": "Validate input", "type": "main", "index": 0 }]] },
-    "Validate input": { "main": [[{ "node": "TikTok: Upload via render sidecar", "type": "main", "index": 0 }]] }
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Validate input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Validate input": {
+      "main": [
+        [
+          {
+            "node": "Publish (multi-platform)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
   },
   "pinData": {}
 }

@@ -98,5 +98,7 @@ cp $B/.env .env
 - [x] Workflow VF – Publish `vfPublishTemplate01`: đã hỗ trợ TikTok Direct Post (`FILE_UPLOAD` qua sidecar nodejs `render/tiktok.js`, không cần public URL S3)
 - [x] Áp dụng toàn bộ core concepts từ `howznguyen/shorts-kit` (`docs/soul`, `docs/flows`, `docs/shots`, `docs/facts`, `render/lint.js`, Remotion safe-zone/caption chunks, ffmpeg `-13 LUFS` + `bt709`, hand-off `out/<id>/`, cổng `Publishable?` trong `workflows/generate-video.json`; `render/smoke.sh` → SMOKE OK)
 - [x] Import lại `workflows/generate-video.json` (đã có node *QC video*; runtime HyperFrames chọn qua `runtime` trong narration); n8n đang chạy (`vn.n8n.dev`)
-- [ ] Bật Schedule (activate workflow `vfGenerateVideo01`) khi muốn chạy hằng ngày
-- [ ] Topic lấy từ danh sách (Sheet/Data table) thay vì giá trị cố định
+- [x] **Topic từ content queue** (`content/queue.json`) thay vì hardcode — workflow lấy qua `GET /topic/next`, báo xong qua `POST /topic/done`. Thêm topic qua `POST /topic/add` hoặc tự động qua trend.
+- [x] **Trend Intelligence + Learning Engine** — `GET /trends/refill` (Google Trends VN → 9Router → topic mới vào queue); `GET /analytics/learn` tổng hợp tín hiệu (retention/CTR/revenue) theo flow/runtime/profile dùng để ưu tiên topic kế tiếp. Dữ liệu ở `data/analytics.sqlite`, được backup kèm `backup.sh`.
+- [x] **Multi-platform publish** — `POST /publish` nhận `platforms:[tiktok,youtube,meta]`. TikTok (Direct Post) đã chạy; YouTube (resumable upload) và Meta (Reels) viết đủ adapter — chỉ cần điền credential trong `.env` (xem `.env.example`). Meta cần `PUBLIC_VIDEO_BASE` (R2 public/tunnel).
+- [ ] Bật Schedule (activate workflow `vfGenerateVideo01`) — workflow hiện đã có nhánh `Refill trends` trước `Next topic`; kích hoạt trong n8n khi muốn chạy hằng ngày 09:00.

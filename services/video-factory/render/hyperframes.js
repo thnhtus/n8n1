@@ -107,7 +107,7 @@ export async function renderHyperFrames({ tmp, id, title, scenes, lineTimings, o
 	];
 	writeFileSync(join(hfDir, 'index.motion.json'), JSON.stringify({ version: 1, duration: Number(totalSec.toFixed(3)), assertions }, null, 2));
 
-	const checkRes = await run('npx', ['--yes', 'hyperframes@0.9.28', 'check', hfDir, '--json', '--strict'], { maxBuffer: 10 * 1024 * 1024 }).catch((e) => {
+	const checkRes = await run('npx', ['--yes', 'hyperframes@0.9.52', 'check', hfDir, '--json', '--strict'], { maxBuffer: 10 * 1024 * 1024 }).catch((e) => {
 		let msg = e.message;
 		try {
 			const r = JSON.parse(e.stdout);
@@ -128,7 +128,7 @@ export async function renderHyperFrames({ tmp, id, title, scenes, lineTimings, o
 
 	const rawOut = join(tmp, 'raw.mp4');
 	await run('npx', [
-		'--yes', 'hyperframes@0.9.28', 'render', hfDir,
+		'--yes', 'hyperframes@0.9.52', 'render', hfDir,
 		'-o', rawOut, '--resolution', 'portrait', '--fps', String(fps), '--crf', String(crf), '--json', '--no-best-effort',
 	], { maxBuffer: 10 * 1024 * 1024 }).catch((e) => {
 		throw new Error(`hyperframes render failed: ${e.stderr || e.stdout || e.message}`);

@@ -8,6 +8,8 @@ mkdir -p "$DEST"
 sqlite3 "$HOME/.n8n/database.sqlite" ".backup '$DEST/n8n.sqlite'"   # consistent while n8n runs
 cp "$HOME/.n8n/config" "$DEST/n8n-config"                           # encryption key: creds unreadable without it
 rsync -a data/s3/ "$DEST/s3/"
+[ -f data/analytics.sqlite ] && sqlite3 data/analytics.sqlite ".backup '$DEST/analytics.sqlite'"
+cp content/queue.json "$DEST/queue.json"
 cp .env docker-compose.yml "$DEST/"
 chmod -R go-rwx "$DEST"
 echo "$DEST"

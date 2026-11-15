@@ -1,0 +1,9 @@
+.env
+data
+out
+render/node_modules
+render/jobs
+render/*.log
+**/node_modules
+**/*.log
+.git
