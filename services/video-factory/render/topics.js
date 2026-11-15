@@ -53,11 +53,17 @@ export async function addTopics(items, file = QUEUE_FILE) {
 	return added.length;
 }
 
-/** Serve the next pending topic and mark it processing. Returns null when empty. */
-export async function nextTopic(file = QUEUE_FILE) {
+/**
+ * Serve the next pending topic and mark it processing. Returns null when empty.
+ * `rank` is an optional function (item) => number; when given, the highest-rank
+ * pending topic is served first (used by the learning engine to prefer flows
+ * that historically performed best). Without it, FIFO order is kept.
+ */
+export async function nextTopic(file = QUEUE_FILE, rank) {
 	const q = await readQueue(file);
-	const item = q.items.find((i) => i.status === 'pending' || !i.status);
-	if (!item) return null;
+	const pending = q.items.filter((i) => i.status === 'pending' || !i.status);
+	if (!pending.length) return null;
+	const item = rank ? [...pending].sort((a, b) => rank(b) - rank(a))[0] : pending[0];
 	item.status = 'processing';
 	await writeQueue(q, file);
 	return { ...DEFAULT_ITEM, ...item };

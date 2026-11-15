@@ -148,6 +148,20 @@ export function learn(db, lambda = 8) {
 	};
 }
 
+/**
+ * Rank function for the topic queue: (item) => expected score of its flow.
+ * Shrinks each measured flow toward the mean score: prior + w·(score − prior),
+ * w = n/(n+λ). Unmeasured flows get the prior, so they are neither starved nor favoured.
+ * Returns undefined when nothing is measured (queue stays FIFO).
+ */
+export function flowRank(learned) {
+	const fl = Array.isArray(learned?.flows) ? learned.flows : [];
+	if (!fl.length) return undefined;
+	const prior = fl.reduce((a, f) => a + f.score, 0) / fl.length;
+	const m = new Map(fl.map((f) => [f.key, prior + f.weight * (f.score - prior)]));
+	return (item) => m.get(item.flow) ?? prior;
+}
+
 // Self-check: node render/analytics.js
 if (import.meta.url === `file://${process.argv[1]}`) {
 	const assert = (await import('node:assert')).strict;
@@ -162,5 +176,10 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	assert.equal(lr.samples, 2);
 	assert.equal(lr.flows[0].key, 'A');
 	assert.equal(db.prepare('SELECT published FROM videos WHERE id=?').get('v1').published, 1);
+	{
+		const r = flowRank({ flows: [{ key: 'A', score: 0.6, weight: 0.5 }, { key: 'B', score: 0.2, weight: 0.5 }] });
+		assert.ok(r({ flow: 'A' }) > r({ flow: 'X' }) && r({ flow: 'X' }) > r({ flow: 'B' }), 'flowRank order');
+		assert.equal(flowRank({ flows: {} }), undefined);
+	}
 	console.log('analytics self-check OK');
 }

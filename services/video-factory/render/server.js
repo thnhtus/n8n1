@@ -16,7 +16,7 @@ import { planSfx, buildAudioMix } from './audio.js';
 import { qcVideo } from './qc.js';
 import { renderHyperFrames } from './hyperframes.js';
 import { genBackground } from './bgimage.js';
-import { openDb, recordVideo, markPublished, ingestMetrics, learn } from './analytics.js';
+import { openDb, recordVideo, markPublished, ingestMetrics, learn, flowRank } from './analytics.js';
 import { nextTopic, doneTopic, addTopics, resetStale } from './topics.js';
 import { publishTo } from './publishers.js';
 import { refill } from './strategy.js';
@@ -266,7 +266,10 @@ app.post('/publish', async (req, res) => {
 // ponytail: a crashed run's topic is retried on the next call; fine with one run at a time, add leases if runs overlap.
 app.get('/topic/next', async (_, res) => {
 	await resetStale();
-	const t = await nextTopic();
+	// Learning engine: rank pending topics by the most-recent learn() flow score.
+	let rank;
+	try { rank = flowRank(learn(db)); } catch (e) { console.error('flowRank', e); }
+	const t = await nextTopic(undefined, rank);
 	res.json(t ? { ok: true, topic: t } : { ok: true, topic: null });
 });
 app.post('/topic/done', async (req, res) => {
