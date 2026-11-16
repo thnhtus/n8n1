@@ -11,6 +11,7 @@ import { execFile as execFileCb } from 'node:child_process';
 import { promisify } from 'node:util';
 import { randomUUID } from 'node:crypto';
 import express from 'express';
+import { verifyAndRepair } from './sourcecheck.js';
 import { T, beatGrid, lintNarration, lintTiming, snapDurationToBeat } from './lint.js';
 import { planSfx, buildAudioMix } from './audio.js';
 import { qcVideo } from './qc.js';
@@ -63,20 +64,10 @@ async function tts(text, voice, file) {
 	return probe(file);
 }
 
-// Every fact URL must answer 2xx. Reachability only: it does not prove the page supports the claim.
+// Every fact URL must answer 2xx. Dead sources are replaced by a reachable Wikipedia page on the same claim (sourcecheck.js).
 async function checkSources(facts = []) {
-	const bad = await Promise.all(facts.map(async (f) => {
-		if (!/^https?:\/\//.test(f.source ?? '')) return null; // lintNarration already reports it
-		const get = (method) => fetch(f.source, { method, redirect: 'follow', signal: AbortSignal.timeout(10000), headers: { 'user-agent': 'Mozilla/5.0 video-factory' } });
-		try {
-			let r = await get('HEAD');
-			if (!r.ok) r = await get('GET'); // many sites reject HEAD
-			return r.ok ? null : `fact ${f.id} source trả ${r.status}: ${f.source}`;
-		} catch (e) {
-			return `fact ${f.id} source không truy cập được (${e.name}): ${f.source}`;
-		}
-	}));
-	return bad.filter(Boolean);
+	const r = await verifyAndRepair(facts);
+	return { errors: r.errors, repaired: r.repaired, facts: r.facts };
 }
 
 // Legacy body { title, sentences } → narration without flow/facts. It renders, but lint blocks publishing.
@@ -95,8 +86,11 @@ async function renderJob(n, voice = DEFAULT_VOICE) {
 	await mkdir(tmp, { recursive: true });
 	await mkdir(out, { recursive: true });
 	try {
+		const sources = await checkSources(n.facts);
+		n = { ...n, facts: sources.facts };
 		const lint = lintNarration(n);
-		lint.errors.push(...(await checkSources(n.facts)));
+		lint.errors.push(...sources.errors);
+		if (sources.repaired.length) lint.repaired = sources.repaired;
 
 		// One background image per scene, generated in parallel with TTS. Prompt = scene.bg, else title + scene text.
 		// Off by default: bg images are opt-in (`bgImages: true`). Stickman scenes use a plain background.

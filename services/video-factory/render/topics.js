@@ -24,7 +24,7 @@ const DEFAULT_ITEM = {
 	profile: 'tiktok',
 };
 
-async function readQueue(file = QUEUE_FILE) {
+export async function readQueue(file = QUEUE_FILE) {
 	let raw;
 	try {
 		raw = await readFile(file, 'utf8');

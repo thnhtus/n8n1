@@ -2,11 +2,13 @@
 // pick finance-flavoured video topics, and appends them to the content queue.
 // This is the "Trend Intelligence" path: the daily schedule can call
 // GET /trends/refill so the factory always has fresh topics without a human.
-import { addTopics } from './topics.js';
+import { addTopics, readQueue } from './topics.js';
 import { demandFor } from './last30days.js';
 
 const TRENDS_RSS = 'https://trends.google.com/trending/rss?geo=VN';
 const ROUTER = process.env.ROUTER_BASE_URL ?? 'http://localhost:20128/v1';
+import { FLOWS } from './lint.js';
+
 const MODEL = process.env.TREND_MODEL ?? 'gemini/gemini-3.1-flash-lite-preview';
 const FINANCE_KEYWORDS = ['tiền', 'lãi', 'đầu tư', 'chứng khoán', 'ngân hàng', 'nợ', 'tiết kiệm', 'vàng', 'chứng', 'tài chính', 'bảo hiểm', 'cổ phiếu', 'lạm phát'];
 
@@ -69,7 +71,17 @@ export async function refill({ limit = 5, keywordFilter = true, demand = true } 
 		scored.push({ topic, demand: d.ok ? d.score : null, demandSocial: d.ok ? d.social : null });
 	}
 	scored.sort((a, b) => (b.demand ?? -1) - (a.demand ?? -1));
-	const added = await addTopics(scored.map(({ topic, demand: score, demandSocial }) => ({ topic, demand: score, demandSocial })));
+	// Spread the queue over the flow library instead of defaulting every trend topic to H:
+	// a flow with no samples cannot be learned, so new topics go to the least-used flows first.
+	const q = await readQueue();
+	const uses = {};
+	for (const i of q.items) if (i.flow) uses[i.flow] = (uses[i.flow] ?? 0) + 1;
+	const flows = Object.keys(FLOWS);
+	const added = await addTopics(scored.map(({ topic, demand: score, demandSocial }) => {
+		const flow = [...flows].sort((a, b) => (uses[a] ?? 0) - (uses[b] ?? 0) || flows.indexOf(a) - flows.indexOf(b))[0];
+		uses[flow] = (uses[flow] ?? 0) + 1;
+		return { topic, flow, beats: FLOWS[flow].beats.join(','), demand: score, demandSocial };
+	}));
 	return { added, topics: scored, trendsSkipped: trends.length - pool.length };
 }
 

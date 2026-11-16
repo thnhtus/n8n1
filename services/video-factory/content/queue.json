@@ -34,23 +34,28 @@
     },
     {
       "topic": "Bitcoin biến động mạnh, nhà đầu tư nên làm gì?",
-      "status": "pending"
+      "status": "pending",
+      "flow": "B"
     },
     {
       "topic": "Giá vàng hôm nay, thời điểm vàng chốt lời đầu tư",
-      "status": "pending"
+      "status": "pending",
+      "flow": "D"
     },
     {
       "topic": "Quản lý chi tiêu mùa mưa bão, tiết kiệm tiền khẩn cấp",
-      "status": "pending"
+      "status": "pending",
+      "flow": "F"
     },
     {
       "topic": "Bẫy tâm lý FOMO trong đầu tư tài chính",
-      "status": "pending"
+      "status": "pending",
+      "flow": "G"
     },
     {
       "topic": "Cách xây dựng quỹ dự phòng tránh nợ xấu",
-      "status": "pending"
+      "status": "pending",
+      "flow": "I"
     }
   ]
 }
