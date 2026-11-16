@@ -22,7 +22,7 @@
       "flow": "A",
       "beats": "hook,reason1,reason2,reason3,context,payoff,share",
       "profile": "tiktok",
-      "status": "pending"
+      "status": "done"
     },
     {
       "topic": "Lạm phát ăn mòn tiền gửi tiết kiệm như thế nào",
@@ -30,7 +30,7 @@
       "flow": "C",
       "beats": "hook,start,step1,step2,step3,payoff,share",
       "profile": "tiktok",
-      "status": "pending"
+      "status": "done"
     },
     {
       "topic": "Bitcoin biến động mạnh, nhà đầu tư nên làm gì?",
