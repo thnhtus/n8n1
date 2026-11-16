@@ -1,6 +1,6 @@
 {
   "id": "vfGenerateVideo01",
-  "name": "VF – Generate video",
+  "name": "VF \u2013 Generate video",
   "active": false,
   "settings": {
     "executionOrder": "v1",
@@ -48,7 +48,7 @@
       ],
       "parameters": {
         "method": "GET",
-        "url": "http://127.0.0.1:3030/topic/next",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/topic/next' }}",
         "options": {
           "timeout": 10000
         }
@@ -98,10 +98,10 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:20128/v1/chat/completions",
+        "url": "={{ ($env.VF_LLM_BASE || 'http://127.0.0.1:20128/v1') + '/chat/completions' }}",
         "sendBody": true,
         "specifyBody": "json",
-        "jsonBody": "={{ JSON.stringify({ model: $json.topic.model, temperature: 0.7, max_tokens: 3000, stream: false, messages: [ { role: 'system', content: \"Bạn viết kịch bản video ngắn tiếng Việt 40-90 giây theo luật kênh. Luật: 1) Facts trước chữ: mỗi câu mang thông tin phải trỏ tới 1 fact có URL nguồn thật, không bịa số liệu. 2) Kết bằng cú lật (payoff phủ định niềm tin người xem) + 1 câu share gắn nội dung, không \\'like và sub\\'. 3) Câu dưới 25 từ, không dùng dấu — – : trong lời đọc, không mở bằng \\'Bạn có biết\\'.  4) Mỗi scene BẮT BUỘC có actor điều khiển nhân vật stickman hoạt hình theo nội dung câu: {\\\"action\\\":\\\"idle|walk|run|jump|wave|think|cheer|sit|fall|point|shrug|dance\\\",\\\"mood\\\":\\\"happy|neutral|sad\\\",\\\"cast\\\":1-4}. Không lặp cùng action quá 2 cảnh liên tiếp. Gợi ý: hook wave hoặc point, vấn đề think shrug fall, payoff cheer jump, share dance, nói về nhiều người thì cast 2-4. Chỉ trả về JSON hợp lệ: {\\\"title\\\": string, \\\"flow\\\": string, \\\"outroHold\\\": 3, \\\"facts\\\": [{\\\"id\\\":\\\"f1\\\",\\\"claim\\\":string,\\\"source\\\":\\\"https://...\\\"}], \\\"scenes\\\": [{\\\"id\\\": beat, \\\"actor\\\": {\\\"action\\\": string, \\\"mood\\\": string, \\\"cast\\\": number}, \\\"lines\\\": [{\\\"text\\\": string, \\\"fact\\\": \\\"f1\\\" hoặc bỏ trống}]}], \\\"caption\\\": string}. scenes đúng thứ tự beats được cho. Không markdown.\" }, { role: 'user', content: 'Chủ đề: ' + $json.topic.topic + '\\nFlow: ' + $json.topic.flow + '\\nBeats: ' + $json.topic.beats + '\\nProfile: ' + ($json.topic.profile || 'tiktok') } ] }) }}",
+        "jsonBody": "={{ JSON.stringify({ model: $json.topic.model, temperature: 0.7, max_tokens: 3000, stream: false, messages: [ { role: 'system', content: \"B\u1ea1n vi\u1ebft k\u1ecbch b\u1ea3n video ng\u1eafn ti\u1ebfng Vi\u1ec7t 40-90 gi\u00e2y theo lu\u1eadt k\u00eanh. Lu\u1eadt: 1) Facts tr\u01b0\u1edbc ch\u1eef: m\u1ed7i c\u00e2u mang th\u00f4ng tin ph\u1ea3i tr\u1ecf t\u1edbi 1 fact c\u00f3 URL ngu\u1ed3n th\u1eadt, kh\u00f4ng b\u1ecba s\u1ed1 li\u1ec7u. 2) K\u1ebft b\u1eb1ng c\u00fa l\u1eadt (payoff ph\u1ee7 \u0111\u1ecbnh ni\u1ec1m tin ng\u01b0\u1eddi xem) + 1 c\u00e2u share g\u1eafn n\u1ed9i dung, kh\u00f4ng \\'like v\u00e0 sub\\'. 4) C\u00e2u d\u01b0\u1edbi 25 t\u1eeb, kh\u00f4ng d\u00f9ng d\u1ea5u \u2014 \u2013 : trong l\u1eddi \u0111\u1ecdc, kh\u00f4ng m\u1edf b\u1eb1ng \\'B\u1ea1n c\u00f3 bi\u1ebft\\'.  4) M\u1ed7i scene B\u1eaeT BU\u1ed8C c\u00f3 actor \u0111i\u1ec1u khi\u1ec3n nh\u00e2n v\u1eadt stickman ho\u1ea1t h\u00ecnh theo n\u1ed9i dung c\u00e2u: {\\\"action\\\":\\\"idle|walk|run|jump|wave|think|cheer|sit|fall|point|shrug|dance\\\",\\\"mood\\\":\\\"happy|neutral|sad\\\",\\\"cast\\\":1-4}. Kh\u00f4ng l\u1eb7p c\u00f9ng action qu\u00e1 2 c\u1ea3nh li\u00ean ti\u1ebfp. G\u1ee3i \u00fd: hook wave ho\u1eb7c point, v\u1ea5n \u0111\u1ec1 think shrug fall, payoff cheer jump, share dance, n\u00f3i v\u1ec1 nhi\u1ec1u ng\u01b0\u1eddi th\u00ec cast 2-4. Ch\u1ec9 tr\u1ea3 v\u1ec1 JSON h\u1ee3p l\u1ec7 (visual optional: th\u00eam scene.visual khi c\u00f3 s\u1ed1 li\u1ec7u/danh s\u00e1ch/tr\u00edch d\u1eabn r\u00f5 r\u00e0ng): {\\\"title\\\": string, \\\"flow\\\": string, \\\"outroHold\\\": 3, \\\"facts\\\": [{\\\"id\\\":\\\"f1\\\",\\\"claim\\\":string,\\\"source\\\":\\\"https://...\\\"}], \\\"scenes\\\": [{\\\"id\\\": beat, \\\"actor\\\": {\\\"action\\\": string, \\\"mood\\\": string, \\\"cast\\\": number}, \\\"visual\\\": {\\\"type\\\": \\\"stat|ring|compare|steps|card|quote|bullets\\\", \\\"label\\\": string, \\\"value\\\": number, \\\"percent\\\": number, \\\"a\\\": {\\\"label\\\": string, \\\"value\\\": number}, \\\"b\\\": {\\\"label\\\": string, \\\"value\\\": number}, \\\"items\\\": [string], \\\"anchor\\\": \\\"first word\\\"} (optional, only when scene has clear visual/data point, omit otherwise)}, \\\"lines\\\": [{\\\"text\\\": string, \\\"fact\\\": \\\"f1\\\" ho\u1eb7c b\u1ecf tr\u1ed1ng}]}], \\\"caption\\\": string}. scenes \u0111\u00fang th\u1ee9 t\u1ef1 beats \u0111\u01b0\u1ee3c cho. Kh\u00f4ng markdown.\" }, { role: 'user', content: 'Ch\u1ee7 \u0111\u1ec1: ' + $json.topic.topic + '\\nFlow: ' + $json.topic.flow + '\\nBeats: ' + $json.topic.beats + '\\nProfile: ' + ($json.topic.profile || 'tiktok') } ] }) }}",
         "options": {
           "timeout": 120000
         }
@@ -117,7 +117,7 @@
         100
       ],
       "parameters": {
-        "jsCode": "// 9Router may append 'data: [DONE]' to non-stream bodies, so the response can arrive as a raw string.\nlet body = $json;\nif (typeof $json.data === 'string') body = JSON.parse($json.data.replace(/\\s*data:\\s*\\[DONE\\]\\s*$/, ''));\nconst choice = body.choices?.[0] ?? {};\nconst text = (choice.message?.content ?? '').replace(/^[\\s`]+|[\\s`]+$/g, '');\nconst start = text.indexOf('{');\nif (start < 0) throw new Error(`LLM did not return JSON (finish_reason=${choice.finish_reason}): ` + text.slice(0, 200));\n// Small models often drop the closing brace, so try the text as-is, then with '}' appended.\nconst raw = text.slice(start, text.lastIndexOf('}') + 1 || undefined);\nlet s;\nfor (const c of [raw, text.slice(start) + '}']) { try { s = JSON.parse(c); break; } catch {} }\nif (!s) throw new Error('LLM JSON unparsable: ' + text.slice(0, 200));\nif (!s.title || !Array.isArray(s.scenes) || !s.scenes.length) throw new Error('Script missing title or scenes');\n// Speech must not carry banned punctuation (docs/soul/thresholds.json bannedPunctuationInSpeech): dashes/colons become commas, ellipses and v.v. are dropped.\nconst clean = (t) => String(t).replace(/\\s*(?:v\\.v\\.|\\.\\.\\.|…)/g, \"\").replace(/\\s*[—–:]\\s*/g, \", \").replace(/,\\s*,/g, \",\").replace(/^,\\s*/, \"\").trim();\nfor (const sc of s.scenes) for (const l of sc.lines ?? []) l.text = clean(l.text);\n// Stickman actor per scene (render/src/stickman.jsx). Unknown values fall back to a beat default, so a bad LLM field never breaks the render.\nconst ACTIONS = ['idle','walk','run','jump','wave','think','cheer','sit','fall','point','shrug','dance'];\nconst BEAT_ACTION = { hook: 'wave', problem: 'think', hardest: 'shrug', payoff: 'cheer', share: 'dance' };\nfor (const sc of s.scenes) {\n  const a = sc.actor && typeof sc.actor === 'object' ? sc.actor : {};\n  if (a.lottie) continue;\n  sc.actor = {\n    action: ACTIONS.includes(a.action) ? a.action : BEAT_ACTION[sc.id] ?? 'point',\n    mood: ['happy','neutral','sad'].includes(a.mood) ? a.mood : 'neutral',\n    cast: Math.min(4, Math.max(1, Math.round(Number(a.cast) || 1))),\n  };\n}\n// The queue owns the flow; the LLM sometimes echoes the beats list here.\ns.flow = $('Next topic').item.json.topic.flow || s.flow;\ns.profile = s.profile || $('Next topic').item.json.topic.profile || 'tiktok';\ns.outroHold = Number(s.outroHold) || 3;\nreturn [{ json: s }];"
+        "jsCode": "// 9Router may append 'data: [DONE]' to non-stream bodies, so the response can arrive as a raw string.\nlet body = $json;\nif (typeof $json.data === 'string') body = JSON.parse($json.data.replace(/\\s*data:\\s*\\[DONE\\]\\s*$/, ''));\nconst choice = body.choices?.[0] ?? {};\nconst text = (choice.message?.content ?? '').replace(/^[\\s`]+|[\\s`]+$/g, '');\nconst start = text.indexOf('{');\nif (start < 0) throw new Error(`LLM did not return JSON (finish_reason=${choice.finish_reason}): ` + text.slice(0, 200));\n// Small models often drop the closing brace, so try the text as-is, then with '}' appended.\nconst raw = text.slice(start, text.lastIndexOf('}') + 1 || undefined);\nlet s;\nfor (const c of [raw, text.slice(start) + '}']) { try { s = JSON.parse(c); break; } catch {} }\nif (!s) throw new Error('LLM JSON unparsable: ' + text.slice(0, 200));\nif (!s.title || !Array.isArray(s.scenes) || !s.scenes.length) throw new Error('Script missing title or scenes');\n// Speech must not carry banned punctuation (docs/soul/thresholds.json bannedPunctuationInSpeech): dashes/colons become commas, ellipses and v.v. are dropped.\nconst clean = (t) => String(t).replace(/\\s*(?:v\\.v\\.|\\.\\.\\.|\u2026)/g, \"\").replace(/\\s*[\u2014\u2013:]\\s*/g, \", \").replace(/,\\s*,/g, \",\").replace(/^,\\s*/, \"\").trim();\nfor (const sc of s.scenes) for (const l of sc.lines ?? []) l.text = clean(l.text);\n// Stickman actor per scene (render/src/stickman.jsx). Unknown values fall back to a beat default, so a bad LLM field never breaks the render.\nconst ACTIONS = ['idle','walk','run','jump','wave','think','cheer','sit','fall','point','shrug','dance'];\nconst BEAT_ACTION = { hook: 'wave', problem: 'think', hardest: 'shrug', payoff: 'cheer', share: 'dance' };\nfor (const sc of s.scenes) {\n  const a = sc.actor && typeof sc.actor === 'object' ? sc.actor : {};\n  if (a.lottie) continue;\n  sc.actor = {\n    action: ACTIONS.includes(a.action) ? a.action : BEAT_ACTION[sc.id] ?? 'point',\n    mood: ['happy','neutral','sad'].includes(a.mood) ? a.mood : 'neutral',\n    cast: Math.min(4, Math.max(1, Math.round(Number(a.cast) || 1))),\n  };\n}\n// Visuals are optional; normalize to a safe subset for the renderer.\nconst VTYPE=['stat','ring','compare','steps','card','text-as-image','quote','bullets','list'];\nconst cleanVisual=(v,id)=>{ if(!v||typeof v!=='object')return undefined; const t=String(v.type||'card'); if(!VTYPE.includes(t))return {type:'card',title:v.label||v.title,subtitle:v.subtitle}; const o={type:t}; if(v.label!==undefined)o.label=String(v.label); if(t==='card'||t==='text-as-image'){o.title=v.title||v.label; if(v.subtitle)o.subtitle=String(v.subtitle); if(v.tag)o.tag=String(v.tag);} if(t==='stat'){o.value=Number(v.value)||0; if(v.prefix)o.prefix=String(v.prefix); if(v.suffix)o.suffix=String(v.suffix);} if(t==='ring'){o.percent=Number(v.percent??v.value)||0;} if(t==='compare'){o.a={label:String(v.a?.label??'A'),value:Number(v.a?.value)||0};o.b={label:String(v.b?.label??'B'),value:Number(v.b?.value)||0};} if(t==='steps'||t==='bullets'||t==='list'){o.items=(Array.isArray(v.items)?v.items:[]).map(String).filter(Boolean).slice(0,6); if(!o.items.length)return undefined;} if(t==='quote'){o.quote=String(v.quote||v.title||v.label||''); if(!o.quote)return undefined; if(v.author||v.subtitle)o.author=String(v.author||v.subtitle);} return Object.keys(o).length>1?o:undefined;};\nfor (const sc of s.scenes) sc.visual = cleanVisual(sc.visual, sc.id);\n// The queue owns the flow; the LLM sometimes echoes the beats list here;\ns.flow = $('Next topic').item.json.topic.flow || s.flow;\ns.profile = s.profile || $('Next topic').item.json.topic.profile || 'tiktok';\ns.outroHold = Number(s.outroHold) || 3;\nreturn [{ json: s }];"
       }
     },
     {
@@ -131,37 +131,15 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:3030/render",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/render' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify($json) }}",
         "options": {
           "timeout": 600000
         }
-      }
-    },
-    {
-      "id": "a8",
-      "name": "Download video",
-      "type": "n8n-nodes-base.httpRequest",
-      "typeVersion": 4.2,
-      "position": [
-        990,
-        100
-      ],
-      "parameters": {
-        "method": "GET",
-        "url": "={{ $('Render').item.json.url }}",
-        "options": {
-          "response": {
-            "response": {
-              "responseFormat": "file",
-              "outputPropertyName": "data"
-            }
-          },
-          "timeout": 600000
-        }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "qc1",
@@ -174,14 +152,15 @@
       ],
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:3030/qc",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/qc' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ file: $('Render').item.json.id + '/' + $('Render').item.json.id + '-upload.mp4' }) }}",
         "options": {
           "timeout": 120000
         }
-      }
+      },
+      "onError": "continueErrorOutput"
     },
     {
       "id": "a7",
@@ -223,7 +202,7 @@
               "id": "r5",
               "name": "publishable",
               "type": "boolean",
-              "value": "={{ $('Render').item.json.publishable && $('QC video').item.json.pass === true }}"
+              "value": "={{ $('Render').item.json.publishable === true && $('QC video').item.json.pass === true }}"
             },
             {
               "id": "r6",
@@ -235,7 +214,7 @@
               "id": "r7",
               "name": "lintErrors",
               "type": "string",
-              "value": "={{ $('Render').item.json.lint.errors.join('\\n') }}"
+              "value": "={{ (($('Render').item.json.lint || {}).errors || []).join('\\n') }}"
             },
             {
               "id": "r8",
@@ -247,13 +226,25 @@
               "id": "r9",
               "name": "qcScore",
               "type": "number",
-              "value": "={{ $('QC video').item.json.score }}"
+              "value": "={{ $('QC video').item.json.score ?? 0 }}"
             },
             {
               "id": "r10",
               "name": "qcErrors",
               "type": "string",
-              "value": "={{ ($('QC video').item.json.errors ?? []).join('\\n') }}"
+              "value": "={{ (($('QC video').item.json.errors) || []).join('\\n') }}"
+            },
+            {
+              "id": "r11",
+              "name": "topic",
+              "type": "string",
+              "value": "={{ $('Next topic').item.json.topic.topic }}"
+            },
+            {
+              "id": "r12",
+              "name": "ok",
+              "type": "boolean",
+              "value": "={{ $('Render').item.json.publishable === true && $('QC video').item.json.pass === true }}"
             }
           ]
         },
@@ -272,7 +263,7 @@
       "onError": "continueRegularOutput",
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:3030/publish",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/publish' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ key: $json.key, title: $json.title, caption: $('Parse script').item.json.caption }) }}",
@@ -326,7 +317,7 @@
       "onError": "continueRegularOutput",
       "parameters": {
         "method": "POST",
-        "url": "http://127.0.0.1:3030/topic/done",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/topic/done' }}",
         "sendBody": true,
         "specifyBody": "json",
         "jsonBody": "={{ JSON.stringify({ topic: $('Next topic').item.json.topic.topic }) }}",
@@ -347,9 +338,165 @@
       "onError": "continueRegularOutput",
       "parameters": {
         "method": "GET",
-        "url": "http://127.0.0.1:3030/trends/refill",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/trends/refill' }}",
         "options": {
           "timeout": 120000
+        }
+      }
+    },
+    {
+      "id": "nt1",
+      "name": "No topic",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        440,
+        300
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "n1",
+              "name": "ok",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "n2",
+              "name": "reason",
+              "type": "string",
+              "value": "no pending topic"
+            },
+            {
+              "id": "n3",
+              "name": "publishable",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "n4",
+              "name": "qcPass",
+              "type": "boolean",
+              "value": "={{ false }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "re1",
+      "name": "Render failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1100,
+        320
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "ok",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "e2",
+              "name": "stage",
+              "type": "string",
+              "value": "render"
+            },
+            {
+              "id": "e3",
+              "name": "topic",
+              "type": "string",
+              "value": "={{ $('Next topic').item.json.topic.topic }}"
+            },
+            {
+              "id": "e4",
+              "name": "publishable",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "e5",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $json.error || $json.message || JSON.stringify($json).slice(0,300) }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "qe1",
+      "name": "QC failed",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1320,
+        320
+      ],
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e1",
+              "name": "ok",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "e2",
+              "name": "stage",
+              "type": "string",
+              "value": "qc"
+            },
+            {
+              "id": "e3",
+              "name": "topic",
+              "type": "string",
+              "value": "={{ $('Next topic').item.json.topic.topic }}"
+            },
+            {
+              "id": "e4",
+              "name": "publishable",
+              "type": "boolean",
+              "value": "={{ false }}"
+            },
+            {
+              "id": "e5",
+              "name": "error",
+              "type": "string",
+              "value": "={{ $json.error || $json.message || JSON.stringify($json).slice(0,300) }}"
+            }
+          ]
+        },
+        "options": {}
+      }
+    },
+    {
+      "id": "rl1",
+      "name": "Release topic",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1540,
+        320
+      ],
+      "onError": "continueRegularOutput",
+      "parameters": {
+        "method": "POST",
+        "url": "={{ ($env.VF_API_BASE || 'http://127.0.0.1:3030') + '/topic/release' }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ JSON.stringify({ topic: $json.topic, reason: $json.stage + ': ' + ($json.error || '') }) }}",
+        "options": {
+          "timeout": 10000
         }
       }
     }
@@ -403,7 +550,14 @@
       "main": [
         [
           {
-            "node": "Download video",
+            "node": "QC video",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Render failed",
             "type": "main",
             "index": 0
           }
@@ -414,23 +568,7 @@
       "main": [
         [
           {
-            "node": "Publishable?",
-            "type": "main",
-            "index": 0
-          },
-          {
             "node": "Topic done",
-            "type": "main",
-            "index": 0
-          }
-        ]
-      ]
-    },
-    "Download video": {
-      "main": [
-        [
-          {
-            "node": "QC video",
             "type": "main",
             "index": 0
           }
@@ -457,6 +595,13 @@
             "type": "main",
             "index": 0
           }
+        ],
+        [
+          {
+            "node": "QC failed",
+            "type": "main",
+            "index": 0
+          }
         ]
       ]
     },
@@ -480,7 +625,13 @@
             "index": 0
           }
         ],
-        []
+        [
+          {
+            "node": "No topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
       ]
     },
     "Refill trends": {
@@ -488,6 +639,39 @@
         [
           {
             "node": "Next topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Topic done": {
+      "main": [
+        [
+          {
+            "node": "Publishable?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Render failed": {
+      "main": [
+        [
+          {
+            "node": "Release topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "QC failed": {
+      "main": [
+        [
+          {
+            "node": "Release topic",
             "type": "main",
             "index": 0
           }

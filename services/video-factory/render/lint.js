@@ -6,7 +6,7 @@ export const T = JSON.parse(readFileSync(new URL('../docs/soul/thresholds.json',
 export const FLOWS = JSON.parse(readFileSync(new URL('../docs/flows/flows.json', import.meta.url)));
 
 /** Graphics the Remotion renderer can draw with no external asset (render/src/visuals.jsx). */
-export const VISUAL_TYPES = ["stat", "ring", "compare", "steps", "card", "text-as-image"];
+export const VISUAL_TYPES = ["stat", "ring", "compare", "steps", "card", "text-as-image", "quote", "bullets", "list"];
 /** Procedural stickman actions & moods (render/src/stickman.jsx). */
 export const ACTOR_ACTIONS = ["idle", "walk", "run", "jump", "wave", "think", "cheer", "sit", "fall", "point", "shrug", "dance"];
 export const ACTOR_MOODS = ["happy", "neutral", "sad"];
@@ -76,6 +76,8 @@ export function lintVisuals(n) {
 		if (t === "ring" && !Number.isFinite(Number(v.percent ?? v.value))) errors.push(`[${s.id}] visual ring thiếu percent (0-100)`);
 		if (t === "compare" && (!v.a || !v.b || !Number.isFinite(Number(v.a.value)) || !Number.isFinite(Number(v.b.value)))) errors.push(`[${s.id}] visual compare cần a.label/a.value và b.label/b.value`);
 		if (t === "steps" && (!Array.isArray(v.items) || !v.items.length)) errors.push(`[${s.id}] visual steps cần items[] không rỗng`);
+		if ((t === "bullets" || t === "list") && (!Array.isArray(v.items) || !v.items.length)) errors.push(`[${s.id}] visual ${t} cần items[] không rỗng`);
+		if (t === "quote" && !(v.quote ?? v.title ?? v.label)) errors.push(`[${s.id}] visual quote cần quote hoặc title`);
 		if ((t === "card" || t === "text-as-image") && !(v.title ?? v.label)) errors.push(`[${s.id}] visual ${t} cần title hoặc label`);
 	}
 

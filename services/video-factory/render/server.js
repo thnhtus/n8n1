@@ -17,8 +17,8 @@ import { planSfx, buildAudioMix } from './audio.js';
 import { qcVideo } from './qc.js';
 import { renderHyperFrames } from './hyperframes.js';
 import { genBackground } from './bgimage.js';
-import { openDb, recordVideo, markPublished, ingestMetrics, learn, flowRank } from './analytics.js';
-import { nextTopic, doneTopic, addTopics, resetStale } from './topics.js';
+import { openDb, recordVideo, markPublished, ingestMetrics, ingestMetricsBatch, learn, flowRank, listVideos, report } from './analytics.js';
+import { nextTopic, doneTopic, addTopics, resetStale, releaseTopic } from './topics.js';
 import { publishTo } from './publishers.js';
 import { refill } from './strategy.js';
 
@@ -270,6 +270,10 @@ app.post('/topic/done', async (req, res) => {
 	const ok = await doneTopic(req.body?.topic);
 	res.json({ ok });
 });
+app.post('/topic/release', async (req, res) => {
+	const ok = await releaseTopic(req.body?.topic, req.body?.reason ?? '');
+	res.json({ ok });
+});
 app.post('/topic/add', async (req, res) => {
 	const items = Array.isArray(req.body?.items) ? req.body.items : [];
 	const n = await addTopics(items);
@@ -285,7 +289,13 @@ app.post('/analytics/ingest', async (req, res) => {
 		res.status(400).json({ ok: false, error: String(e.message ?? e) });
 	}
 });
+app.post('/analytics/ingest/batch', (req, res) => {
+	const rows = Array.isArray(req.body?.rows) ? req.body.rows : [];
+	res.json(ingestMetricsBatch(db, rows));
+});
 app.get('/analytics/learn', (_, res) => res.json(learn(db)));
+app.get('/analytics/videos', (req, res) => res.json({ videos: listVideos(db, { limit: Math.min(500, Number(req.query.limit) || 100) }) }));
+app.get('/analytics/report', (req, res) => res.json(report(db, { limit: Math.min(200, Number(req.query.limit) || 50) })));
 app.get('/trends/refill', async (_, res) => {
 	try { res.json(await refill()); } catch (e) { res.status(500).json({ ok: false, error: String(e.message ?? e) }); }
 });

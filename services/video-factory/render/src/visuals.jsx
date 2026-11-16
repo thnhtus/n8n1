@@ -1,6 +1,5 @@
 // Pure-SVG graphics inspired by shorts-kit (charts, odometer, progress, compare bars).
 // Zero external dependencies; driven by Remotion frame interpolation.
-import React from 'react';
 import { Easing, interpolate, useCurrentFrame } from 'remotion';
 
 const camEase = (t, tail = 0.3) => {
@@ -123,6 +122,43 @@ export const TextCardGraphic = ({ title = '', subtitle = '', tag = '', startFram
 	);
 };
 
+/** Highlighted quote / hook card. */
+export const QuoteGraphic = ({ quote = '', author = '', startFrame = 0 }) => {
+	const f = useCurrentFrame();
+	const opacity = interpolate(f - startFrame, [0, 5], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+	const y = interpolate(f - startFrame, [0, 8], [18, 0], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.exp) });
+	return (
+		<div style={{ opacity, transform: `translateY(${y}px)`, width: 660, padding: '30px 34px', background: 'linear-gradient(135deg, rgba(255,209,102,0.18), rgba(255,255,255,0.06))', borderRadius: 26, border: '1px solid rgba(255,209,102,0.35)', position: 'relative' }}>
+			<div style={{ position: 'absolute', top: 8, left: 18, fontSize: 90, lineHeight: 1, color: 'rgba(255,209,102,0.35)', fontWeight: 900 }}>“</div>
+			<div style={{ fontSize: 40, fontWeight: 800, color: '#fff', lineHeight: 1.3, paddingTop: 18 }}>{quote}</div>
+			{author && <div style={{ marginTop: 14, fontSize: 24, fontWeight: 700, color: '#ffd166' }}>— {author}</div>}
+		</div>
+	);
+};
+
+/** Animated bullet list for key points. */
+export const BulletsGraphic = ({ title = '', items = [], startFrame = 0 }) => {
+	const f = useCurrentFrame();
+	const opacity = interpolate(f - startFrame, [0, 4], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp' });
+	return (
+		<div style={{ opacity, width: 660, padding: '24px 28px', background: 'rgba(255,255,255,0.07)', borderRadius: 24, border: '1px solid rgba(255,255,255,0.16)' }}>
+			{title && <div style={{ fontSize: 30, fontWeight: 800, color: '#ffd166', marginBottom: 16 }}>{title}</div>}
+			<div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+				{(Array.isArray(items) ? items : []).slice(0, 6).map((it, idx) => {
+					const inAt = startFrame + 4 + idx * 5;
+					const p = interpolate(f - inAt, [0, 6], [0, 1], { extrapolateLeft: 'clamp', extrapolateRight: 'clamp', easing: Easing.out(Easing.exp) });
+					return (
+						<div key={idx} style={{ opacity: p, transform: `translateX(${(1 - p) * 18}px)`, display: 'flex', gap: 14, alignItems: 'flex-start' }}>
+							<div style={{ width: 14, height: 14, borderRadius: 7, marginTop: 12, background: idx % 2 ? '#06d6a0' : '#ffd166', boxShadow: `0 0 12px ${idx % 2 ? '#06d6a0' : '#ffd166'}66` }} />
+							<div style={{ fontSize: 28, fontWeight: 700, color: 'rgba(255,255,255,0.92)', lineHeight: 1.35 }}>{String(it)}</div>
+						</div>
+					);
+				})}
+			</div>
+		</div>
+	);
+};
+
 /** Master graphic router matching `visual: { type, ... }`. */
 export const SceneGraphic = ({ visual, startFrame = 0 }) => {
 	if (!visual || !visual.type) return null;
@@ -135,10 +171,14 @@ export const SceneGraphic = ({ visual, startFrame = 0 }) => {
 			return <CompareGraphic a={visual.a} b={visual.b} startFrame={startFrame} />;
 		case 'steps':
 			return <StepsGraphic items={visual.items} activeIndex={visual.activeIndex ?? 0} startFrame={startFrame} />;
+		case 'quote':
+			return <QuoteGraphic quote={visual.quote ?? visual.title ?? visual.label} author={visual.author ?? visual.subtitle} startFrame={startFrame} />;
+		case 'bullets':
+		case 'list':
+			return <BulletsGraphic title={visual.title ?? visual.label} items={visual.items ?? []} startFrame={startFrame} />;
 		case 'card':
 		case 'text-as-image':
-			return <TextCardGraphic title={visual.title ?? visual.label} subtitle={visual.subtitle} tag={visual.tag} startFrame={startFrame} />;
 		default:
-			return null;
+			return <TextCardGraphic title={visual.title ?? visual.label} subtitle={visual.subtitle} tag={visual.tag} startFrame={startFrame} />;
 	}
 };

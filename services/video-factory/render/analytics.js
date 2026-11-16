@@ -78,6 +78,45 @@ export function markPublished(db, id, platform, at = new Date().toISOString()) {
 	db.prepare('UPDATE videos SET published=1, published_at=?, platform=? WHERE id=?').run(at, platform, id);
 }
 
+/** List videos with aggregated metrics for review/analytics loop. */
+export function listVideos(db, { limit = 100 } = {}) {
+	return db.prepare(`
+    SELECT v.id, v.title, v.flow, v.runtime, v.profile, v.duration_sec, v.qc_score,
+           v.published, v.published_at, v.platform, v.key, v.created_at,
+           COALESCE(SUM(m.views), 0) AS views,
+           CASE WHEN COALESCE(SUM(m.views),0)=0 THEN 0 ELSE SUM(m.retention * m.views) / SUM(m.views) END AS retention,
+           CASE WHEN COALESCE(SUM(m.views),0)=0 THEN 0 ELSE SUM(m.ctr * m.views) / SUM(m.views) END AS ctr,
+           CASE WHEN COALESCE(SUM(m.views),0)=0 THEN 0 ELSE SUM(m.engagement * m.views) / SUM(m.views) END AS engagement,
+           COALESCE(SUM(m.revenue), 0) AS revenue
+    FROM videos v LEFT JOIN metrics m ON m.video_id = v.id
+    GROUP BY v.id ORDER BY v.created_at DESC LIMIT ?
+  `).all(limit);
+}
+
+/** Ingest a batch of metric rows: [{videoId, platform, views, retention, ctr, engagement, revenue}]. */
+export function ingestMetricsBatch(db, rows = []) {
+	let ok = 0;
+	const errors = [];
+	for (const r of rows) {
+		try {
+			ingestMetrics(db, r.videoId, r.platform, r);
+			ok++;
+		} catch (e) {
+			errors.push({ videoId: r.videoId, platform: r.platform, error: String(e.message ?? e) });
+		}
+	}
+	return { ok, failed: errors.length, errors };
+}
+
+/** Report for the analytics loop: learn signals + ranked videos + flow recommendation. */
+export function report(db, { lambda = 8, limit = 50 } = {}) {
+	const lr = learn(db, lambda);
+	const videos = listVideos(db, { limit });
+	const rank = flowRank(lr);
+	const byFlow = (Array.isArray(lr.flows) ? lr.flows : []).map((f) => ({ ...f, expected: rank ? Number(rank({ flow: f.key }).toFixed(4)) : f.score }));
+	return { ...lr, flowRanking: byFlow, videos, generatedAt: new Date().toISOString() };
+}
+
 /**
  * Ingest platform metrics. Damping: a video that never got impressions is
  * treated as a miss, so a zero-view flop still bends the strategy away from
@@ -103,7 +142,7 @@ export function ingestMetrics(db, videoId, platform, m) {
 
 /**
  * Learning pass. Returns strategy signals, each with a normalized 0..1 weight.
- * All numbers are damped toward the less (0.5) by n/(n+λ).
+ * All numbers are damped toward the prior by n/(n+λ).
  */
 export function learn(db, lambda = 8) {
 	const damping = (n) => n / (n + lambda);
@@ -115,7 +154,7 @@ export function learn(db, lambda = 8) {
   `).all();
 
 	if (!rows.length) {
-		return { samples: 0, flows: {}, notes: ['chưa có số liệu — cần ít nhất một video được đo'] };
+		return { samples: 0, flows: [], runtimes: [], profiles: [], notes: ['chưa có số liệu — cần ít nhất một video được đo'] };
 	}
 
 	const by = (key) => {
@@ -132,7 +171,7 @@ export function learn(db, lambda = 8) {
 		}
 		return [...g.entries()].map(([k, e]) => {
 			const score = e.views ? (e.retentionW / e.views) * 0.5 + (e.ctrW / e.views) * 0.3 + Math.min(1, e.revenue / (e.views || 1) / 10) * 0.2 : 0;
-			return { key: k, n: e.n, views: e.views, score, weight: damping(e.n) };
+			return { key: k, n: e.n, views: e.views, score: Number(score.toFixed(4)), weight: Number(damping(e.n).toFixed(4)) };
 		}).sort((a, b) => b.weight * b.score - a.weight * a.score);
 	};
 
@@ -142,7 +181,7 @@ export function learn(db, lambda = 8) {
 		runtimes: by('runtime'),
 		profiles: by('profile'),
 		notes: [
-			'weight = n/(n+λ) — mẫu nhỏ bị kéo về 0.5, chưa là phán quyết',
+			'weight = n/(n+λ) — mẫu nhỏ bị kéo về prior, chưa là phán quyết',
 			'score = 0.5·retention + 0.3·CTR + 0.2·revenue(đã chuẩn hóa)',
 		],
 	};
@@ -174,12 +213,18 @@ if (import.meta.url === `file://${process.argv[1]}`) {
 	markPublished(db, 'v1', 'tiktok');
 	const lr = learn(db, 8);
 	assert.equal(lr.samples, 2);
-	assert.equal(lr.flows[0].key, 'A');
+		assert.equal(lr.flows[0].key, 'A');
 	assert.equal(db.prepare('SELECT published FROM videos WHERE id=?').get('v1').published, 1);
 	{
 		const r = flowRank({ flows: [{ key: 'A', score: 0.6, weight: 0.5 }, { key: 'B', score: 0.2, weight: 0.5 }] });
 		assert.ok(r({ flow: 'A' }) > r({ flow: 'X' }) && r({ flow: 'X' }) > r({ flow: 'B' }), 'flowRank order');
 		assert.equal(flowRank({ flows: {} }), undefined);
 	}
+	const vs = listVideos(db, { limit: 10 });
+	assert.equal(vs.length, 2);
+	const b = ingestMetricsBatch(db, [{ videoId: 'v1', platform: 'tiktok', views: 1200, retention: 0.65, ctr: 0.06 }, { videoId: 'nope', platform: 'x', views: 1 }]);
+	assert.equal(b.ok, 1); assert.equal(b.failed, 1);
+	const rep = report(db);
+	assert.ok(Array.isArray(rep.videos) && Array.isArray(rep.flows) && rep.generatedAt);
 	console.log('analytics self-check OK');
 }
